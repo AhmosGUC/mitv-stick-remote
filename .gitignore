@@ -1,0 +1,22 @@
+# Dependencies and build output
+node_modules/
+dist/
+build/
+__pycache__/
+*.pyc
+.venv/
+
+# Secrets and device-specific config
+.env
+.env.*
+*.pem
+*.key
+adbkey
+adbkey.pub
+config.local.*
+
+# Logs and OS files
+*.log
+.DS_Store
+.idea/
+.vscode/
