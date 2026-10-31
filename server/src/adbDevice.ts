@@ -1,9 +1,20 @@
 import { execFile } from 'node:child_process';
 import { UserError } from './device.ts';
 import type { Device, DeviceStatus, InstalledApp, LaunchTarget } from './device.ts';
-import { KEYS } from './keys.ts';
+import { PersistentShell } from './adbShell.ts';
+import { EVDEV_KEYS, KEYS } from './keys.ts';
 import type { KeyName } from './keys.ts';
-import { ACTION_RE, PACKAGE_RE, buildInputTextCommand, parsePackages, parseStatusOutput, shq } from './parse.ts';
+import {
+  ACTION_RE,
+  PACKAGE_RE,
+  buildInputTextCommand,
+  buildKeyWrite,
+  inputEventSize,
+  parsePackages,
+  parseRemoteInputDevice,
+  parseStatusOutput,
+  shq,
+} from './parse.ts';
 
 const ADB_MISSING = 500;
 
@@ -48,11 +59,14 @@ export class AdbDevice implements Device {
   readonly label: string;
   private serial: string;
   private adbPath: string;
+  private keyShell: PersistentShell;
+  private inputDevice: { path: string; eventSize: number } | null | undefined;
 
   constructor(host: string, port = 5555, adbPath = 'adb') {
     this.serial = `${host}:${port}`;
     this.label = this.serial;
     this.adbPath = adbPath;
+    this.keyShell = new PersistentShell(adbPath, this.serial);
   }
 
   private async connect(): Promise<void> {
@@ -74,7 +88,29 @@ export class AdbDevice implements Device {
     }
   }
 
+  /** The remote's /dev/input node, found once; null if there isn't one (keys then use `input keyevent`). */
+  private async remoteInputDevice() {
+    if (this.inputDevice === undefined) {
+      const path = parseRemoteInputDevice(await this.shell('getevent -p'));
+      const eventSize = inputEventSize(await this.shell('getprop ro.product.cpu.abi'));
+      this.inputDevice = path ? { path, eventSize } : null;
+    }
+    return this.inputDevice;
+  }
+
   async key(name: KeyName): Promise<void> {
+    const code = EVDEV_KEYS[name];
+    if (code !== undefined) {
+      try {
+        const device = await this.remoteInputDevice();
+        if (device) {
+          await this.keyShell.run(buildKeyWrite(device.path, code, device.eventSize));
+          return;
+        }
+      } catch {
+        // fall through to the slower, always-available path (it also reconnects if needed)
+      }
+    }
     await this.shell(`input keyevent ${KEYS[name]}`);
   }
 
