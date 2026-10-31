@@ -40,6 +40,13 @@ export interface InstalledApp {
   package: string;
 }
 
+export interface ProcessMemory {
+  name: string;
+  pid: number;
+  memoryMb: number;
+  state?: string;
+}
+
 export interface LogEntry {
   id: number;
   ts: number;

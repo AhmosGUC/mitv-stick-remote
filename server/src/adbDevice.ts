@@ -1,9 +1,9 @@
 import { execFile } from 'node:child_process';
 import { UserError } from './device.ts';
-import type { Device, DeviceStatus, InstalledApp, LaunchTarget } from './device.ts';
+import type { Device, DeviceStatus, InstalledApp, LaunchTarget, ProcessMemory } from './device.ts';
 import { KEYS } from './keys.ts';
 import type { KeyName } from './keys.ts';
-import { ACTION_RE, PACKAGE_RE, buildInputTextCommand, parsePackages, parseStatusOutput, shq } from './parse.ts';
+import { ACTION_RE, PACKAGE_RE, buildInputTextCommand, parsePackages, parseProcessMemory, parseStatusOutput, shq } from './parse.ts';
 
 const ADB_MISSING = 500;
 
@@ -123,5 +123,15 @@ export class AdbDevice implements Device {
   async listApps(): Promise<InstalledApp[]> {
     const out = await this.shell('pm list packages -3');
     return parsePackages(out).map((p) => ({ package: p }));
+  }
+
+  async killApp(packageName: string): Promise<void> {
+    if (!PACKAGE_RE.test(packageName)) throw new UserError(`Invalid package name: ${packageName}`);
+    await this.shell(`am force-stop ${packageName}`);
+  }
+
+  async listProcesses(): Promise<ProcessMemory[]> {
+    const out = await this.shell("dumpsys meminfo | sed -n '/^Total PSS by process:/,/^$/p'", 20_000);
+    return parseProcessMemory(out);
   }
 }

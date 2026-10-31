@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Badge, Container, Grid, Group, Paper, SegmentedControl, Stack, Tabs, Text, Title } from '@mantine/core';
 import { api } from './api';
 import { LogPanel } from './components/LogPanel';
+import { MemoryPanel } from './components/MemoryPanel';
 import { RemotePad } from './components/RemotePad';
 import { ShortcutsPanel } from './components/ShortcutsPanel';
 import { StatusPanel } from './components/StatusPanel';
@@ -76,6 +77,7 @@ export default function App() {
                 <Tabs.Tab value="shortcuts">Shortcuts</Tabs.Tab>
                 <Tabs.Tab value="type">Type</Tabs.Tab>
                 <Tabs.Tab value="status">Status</Tabs.Tab>
+                <Tabs.Tab value="memory">Memory</Tabs.Tab>
                 <Tabs.Tab value="log">Log</Tabs.Tab>
               </Tabs.List>
               <Tabs.Panel value="shortcuts">
@@ -86,6 +88,9 @@ export default function App() {
               </Tabs.Panel>
               <Tabs.Panel value="status">
                 <StatusPanel status={status} error={error} onRefresh={() => void refresh()} />
+              </Tabs.Panel>
+              <Tabs.Panel value="memory">
+                <MemoryPanel status={status} />
               </Tabs.Panel>
               <Tabs.Panel value="log">
                 <LogPanel />

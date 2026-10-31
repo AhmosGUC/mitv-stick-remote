@@ -1,5 +1,5 @@
 import { UserError } from './device.ts';
-import type { Memory, NetworkInfo } from './device.ts';
+import type { Memory, NetworkInfo, ProcessMemory } from './device.ts';
 
 /** Android package names, e.g. com.netflix.ninja */
 export const PACKAGE_RE = /^[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z0-9_]+)+$/;
@@ -102,4 +102,18 @@ export function parseStatusOutput(out: string) {
     network: Object.keys(network).length > 0 ? network : null,
     foregroundApp: parseFocus(focus),
   };
+}
+
+/** Parses the "Total PSS by process" section of `dumpsys meminfo`: `229,252K: com.app (pid 6404 / activities)`. */
+export function parseProcessMemory(text: string): ProcessMemory[] {
+  const out: ProcessMemory[] = [];
+  for (const line of text.split('\n')) {
+    const m = /^\s*([\d,]+)K: (.+?) \(pid (\d+)(?: \/ ([^)]*))?\)/.exec(line);
+    if (!m) continue;
+    const [, kb = '', name = '', pid = '', state] = m;
+    const proc: ProcessMemory = { name, pid: Number(pid), memoryMb: Math.round((Number(kb.replace(/,/g, '')) / 1024) * 10) / 10 };
+    if (state) proc.state = state;
+    out.push(proc);
+  }
+  return out.sort((a, b) => b.memoryMb - a.memoryMb);
 }
