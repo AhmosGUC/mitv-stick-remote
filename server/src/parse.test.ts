@@ -2,11 +2,14 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   buildInputTextCommand,
+  buildKeyWrite,
+  inputEventSize,
   normalizeTypedText,
   parseFocus,
   parseIp,
   parseMeminfo,
   parsePackages,
+  parseRemoteInputDevice,
   parseStatusOutput,
   parseWifiInfo,
   shq,
@@ -75,4 +78,32 @@ test('parseStatusOutput splits the four sections', () => {
   assert.equal(s.memory?.usedPct, 57);
   assert.deepEqual(s.network, { ssid: 'Home', rssi: -60, linkSpeedMbps: 300, frequencyMhz: 2437, ip: '10.0.0.7' });
   assert.equal(s.foregroundApp, 'com.netflix.ninja');
+});
+
+test('parseRemoteInputDevice picks the remote, not the virtual/cec/keypad devices', () => {
+  const out = [
+    'add device 1: /dev/input/event3\n  name:     "Xiaomi RC"\n  events:',
+    'add device 2: /dev/input/event2\n  name:     "virtual-search"\n  events:',
+    'add device 3: /dev/input/event1\n  name:     "cec_input"\n  events:',
+    'add device 4: /dev/input/event0\n  name:     "aml_keypad"\n  events:',
+  ].join('\n');
+  assert.equal(parseRemoteInputDevice(out), '/dev/input/event3');
+  assert.equal(parseRemoteInputDevice('add device 1: /dev/input/event0\n  name:     "aml_keypad"'), null);
+  assert.equal(parseRemoteInputDevice(''), null);
+});
+
+test('buildKeyWrite writes press+release+sync records for a 32-bit and a 64-bit device', () => {
+  const rec = (type: number, code: number, value: number, size: number) =>
+    '\\000'.repeat(size - 8) + [type, 0, code, 0, value, 0, 0, 0].map((n) => `\\${n.toString(8).padStart(3, '0')}`).join('');
+  for (const size of [16, 24]) {
+    const expected = rec(1, 103, 1, size) + rec(0, 0, 0, size) + rec(1, 103, 0, size) + rec(0, 0, 0, size);
+    assert.equal(buildKeyWrite('/dev/input/event3', 103, size), `printf '${expected}' > /dev/input/event3`);
+  }
+  // keycodes above 255 spill into the second code byte (KEY_OK = 352)
+  assert.match(buildKeyWrite('/dev/input/event3', 352), /\\140\\001\\001/);
+});
+
+test('inputEventSize follows the abi', () => {
+  assert.equal(inputEventSize('armeabi-v7a\n'), 16);
+  assert.equal(inputEventSize('arm64-v8a\n'), 24);
 });

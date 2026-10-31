@@ -29,3 +29,25 @@ export const KEY_NAMES = Object.keys(KEYS) as KeyName[];
 export function isKeyName(value: unknown): value is KeyName {
   return typeof value === 'string' && Object.hasOwn(KEYS, value);
 }
+
+// Linux input codes for keys that `sendevent` can inject straight into the remote's input device,
+// skipping the slow `input keyevent` (it starts a Java process on the stick, ~1 s). Codes are
+// checked against the stick's Generic.kl; keys missing here (ENTER, SEARCH, POWER, SLEEP, WAKEUP)
+// keep using `input keyevent`.
+export const EVDEV_KEYS: Partial<Record<KeyName, number>> = {
+  UP: 103,
+  DOWN: 108,
+  LEFT: 105,
+  RIGHT: 106,
+  OK: 28,
+  BACK: 158,
+  HOME: 172,
+  MENU: 139,
+  DELETE: 14,
+  VOL_UP: 115,
+  VOL_DOWN: 114,
+  MUTE: 113,
+  PLAY_PAUSE: 164,
+  REWIND: 168,
+  FAST_FORWARD: 208,
+};

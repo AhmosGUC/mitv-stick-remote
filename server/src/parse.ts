@@ -103,3 +103,34 @@ export function parseStatusOutput(out: string) {
     foregroundApp: parseFocus(focus),
   };
 }
+
+/** Find the remote's input device in `getevent -p` output (e.g. "Xiaomi RC" -> /dev/input/event3). */
+export function parseRemoteInputDevice(out: string): string | null {
+  const re = /add device \d+: (\/dev\/input\/event\d+)\s+name:\s+"([^"]*)"/g;
+  for (const m of out.matchAll(re)) {
+    const [, device = '', name = ''] = m;
+    if (/\b(rc|remote)\b/i.test(name)) return device;
+  }
+  return null;
+}
+
+/** Size of a Linux `struct input_event`: 16 bytes for 32-bit userspace, 24 for 64-bit. */
+export function inputEventSize(abi: string): number {
+  return /64/.test(abi) ? 24 : 16;
+}
+
+/**
+ * Shell line that presses and releases a Linux input key by writing raw `input_event` records to
+ * the event device. `printf` is a shell builtin, so unlike `sendevent` (one process per event)
+ * nothing is spawned on the stick. The timestamp is left zero; the kernel ignores it on write.
+ */
+export function buildKeyWrite(device: string, code: number, eventSize = 16): string {
+  const oct = (n: number) => `\\${n.toString(8).padStart(3, '0')}`;
+  const record = (type: number, c: number, value: number) =>
+    oct(0).repeat(eventSize - 8) +
+    oct(type & 255) + oct(type >> 8) +
+    oct(c & 255) + oct(c >> 8) +
+    oct(value & 255) + oct(0) + oct(0) + oct(0);
+  const bytes = record(1, code, 1) + record(0, 0, 0) + record(1, code, 0) + record(0, 0, 0);
+  return `printf '${bytes}' > ${device}`;
+}
