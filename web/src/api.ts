@@ -1,4 +1,4 @@
-import type { DeviceStatus, Info, InstalledApp, KeyName, LogEntry, Shortcut, ShortcutAction } from './types';
+import type { DeviceStatus, Info, InstalledApp, KeyName, LogEntry, ProcessMemory, Shortcut, ShortcutAction } from './types';
 
 async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
   const res = await fetch(`/api${path}`, {
@@ -26,5 +26,6 @@ export const api = {
     request<Shortcut>('POST', '/shortcuts', { label, group, action }),
   unpinShortcut: (id: string) => request<void>('DELETE', `/shortcuts/${encodeURIComponent(id)}`),
   apps: () => request<InstalledApp[]>('GET', '/apps'),
+  processes: () => request<ProcessMemory[]>('GET', '/processes'),
   log: () => request<LogEntry[]>('GET', '/log'),
 };

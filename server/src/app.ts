@@ -108,6 +108,8 @@ export function createApp(opts: AppOptions): http.Server {
 
   router.get('/api/apps', () => act('apps', 'list installed apps', () => device.listApps()));
 
+  router.get('/api/processes', () => act('processes', 'list RAM use by process', () => device.listProcesses()));
+
   router.get('/api/log', () => log.list());
 
   return createHttpServer(router, {

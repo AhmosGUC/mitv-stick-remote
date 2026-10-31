@@ -7,6 +7,7 @@ import {
   parseIp,
   parseMeminfo,
   parsePackages,
+  parseProcessMemory,
   parseStatusOutput,
   parseWifiInfo,
   shq,
@@ -75,4 +76,20 @@ test('parseStatusOutput splits the four sections', () => {
   assert.equal(s.memory?.usedPct, 57);
   assert.deepEqual(s.network, { ssid: 'Home', rssi: -60, linkSpeedMbps: 300, frequencyMhz: 2437, ip: '10.0.0.7' });
   assert.equal(s.foregroundApp, 'com.netflix.ninja');
+});
+
+test('parseProcessMemory reads the PSS-by-process section, biggest first', () => {
+  const out = [
+    'Total PSS by process:',
+    '     50,955K: com.google.android.gms (pid 31142)',
+    '    229,252K: com.iptvstreamplayer.iptvstreamplayer (pid 6404 / activities)',
+    '      1,720K: /init (pid 1)',
+    '',
+  ].join('\r\n');
+  assert.deepEqual(parseProcessMemory(out), [
+    { name: 'com.iptvstreamplayer.iptvstreamplayer', pid: 6404, memoryMb: 223.9, state: 'activities' },
+    { name: 'com.google.android.gms', pid: 31142, memoryMb: 49.8 },
+    { name: '/init', pid: 1, memoryMb: 1.7 },
+  ]);
+  assert.deepEqual(parseProcessMemory(''), []);
 });

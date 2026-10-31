@@ -1,4 +1,4 @@
-import type { Device, DeviceStatus, InstalledApp, LaunchTarget } from './device.ts';
+import type { Device, DeviceStatus, InstalledApp, LaunchTarget, ProcessMemory } from './device.ts';
 import type { KeyName } from './keys.ts';
 import { normalizeTypedText } from './parse.ts';
 
@@ -11,6 +11,15 @@ const MOCK_APPS = [
   'com.spotify.tv.android',
   'org.xbmc.kodi',
   'com.android.vending',
+];
+
+const MOCK_PROCESSES: ProcessMemory[] = [
+  { name: 'org.xbmc.kodi', pid: 6404, memoryMb: 229.3, state: 'activities' },
+  { name: 'com.google.android.gms', pid: 3142, memoryMb: 51 },
+  { name: 'com.google.android.katniss:search', pid: 7918, memoryMb: 48.9 },
+  { name: 'system', pid: 3188, memoryMb: 41.9 },
+  { name: 'com.android.vending', pid: 6795, memoryMb: 26.6 },
+  { name: 'com.mock.launcher', pid: 3770, memoryMb: 8.7, state: 'activities' },
 ];
 
 /** A pretend stick: same behavior and validation as the real one, no hardware needed. */
@@ -66,5 +75,10 @@ export class MockDevice implements Device {
   async listApps(): Promise<InstalledApp[]> {
     await sleep(this.delayMs);
     return MOCK_APPS.map((p) => ({ package: p }));
+  }
+
+  async listProcesses(): Promise<ProcessMemory[]> {
+    await sleep(this.delayMs);
+    return MOCK_PROCESSES.map((p) => ({ ...p }));
   }
 }

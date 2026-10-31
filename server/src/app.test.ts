@@ -121,3 +121,11 @@ test('apps list and action log', async () => {
   assert.ok(log.json.length > 0);
   assert.ok(log.json.some((e: any) => e.kind === 'text' && e.ok === false), 'failed Arabic attempt is logged');
 });
+
+test('processes are listed biggest first', async () => {
+  const r = await call('GET', '/api/processes');
+  assert.equal(r.status, 200);
+  assert.ok(r.json.length > 1);
+  assert.ok(r.json[0].memoryMb >= r.json[1].memoryMb);
+  assert.equal(typeof r.json[0].name, 'string');
+});

@@ -40,6 +40,15 @@ export interface DeviceStatus {
   checkedAt: number;
 }
 
+export interface ProcessMemory {
+  name: string;
+  pid: number;
+  /** Proportional set size: the RAM this process is actually responsible for. */
+  memoryMb: number;
+  /** Android's state for it, e.g. "activities" for an app that is open. */
+  state?: string;
+}
+
 export type LaunchTarget =
   | { type: 'app'; package: string }
   | { type: 'intent'; action: string; data?: string };
@@ -57,4 +66,6 @@ export interface Device {
   launch(target: LaunchTarget): Promise<void>;
   status(): Promise<DeviceStatus>;
   listApps(): Promise<InstalledApp[]>;
+  /** Running processes, biggest RAM user first. */
+  listProcesses(): Promise<ProcessMemory[]>;
 }
