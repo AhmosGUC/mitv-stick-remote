@@ -17,14 +17,15 @@ try {
 const env = process.env;
 const port = Number(env.PORT ?? 8787);
 const host = env.HOST ?? '127.0.0.1';
-const useMock = env.MOCK === '1' || !env.STICK_HOST;
+const forcedMock = env.MOCK === '1' || process.argv.includes('--mock');
+const useMock = forcedMock || !env.STICK_HOST;
 
 let device: Device;
 if (useMock) {
   device = new MockDevice();
   console.log(
-    env.MOCK === '1'
-      ? 'Mock mode (MOCK=1): no real TV is controlled.'
+    forcedMock
+      ? 'Mock mode (--mock or MOCK=1): no real TV is controlled.'
       : 'Mock mode: STICK_HOST is not set, so no real TV is controlled. Copy .env.example to .env and set STICK_HOST.',
   );
 } else {

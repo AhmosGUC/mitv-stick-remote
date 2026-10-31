@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "node --watch src/index.ts",
+    "dev:mock": "node --watch src/index.ts --mock",
     "start": "node src/index.ts",
     "doctor": "node src/doctor.ts",
     "test": "node --test \"src/**/*.test.ts\"",

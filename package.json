@@ -7,7 +7,7 @@
   "workspaces": ["server", "web"],
   "scripts": {
     "dev": "concurrently -k -n server,web -c blue,green \"npm run dev -w server\" \"npm run dev -w web\"",
-    "dev:mock": "MOCK=1 npm run dev",
+    "dev:mock": "concurrently -k -n server,web -c blue,green \"npm run dev:mock -w server\" \"npm run dev -w web\"",
     "build": "npm run build -w web",
     "start": "npm run start -w server",
     "doctor": "npm run doctor -w server",

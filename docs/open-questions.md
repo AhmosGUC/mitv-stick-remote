@@ -1,14 +1,19 @@
-# Open questions
+# Decisions and open questions
 
-Answer these to unblock the first requirements. Update this file as decisions are made.
+## Decided (2026-10-31)
 
-1. Which device will you control it from (phone, laptop, both)? Which OS?
-2. Preferred form: web app (PWA) on the home network, native Android app, desktop app, or something else?
-3. Are you comfortable enabling developer options and network ADB on the stick?
-4. Which Mi TV Stick generation and Android TV version is it?
-5. Does the stick have a fixed IP or DHCP reservation on your router?
-6. Which languages must the keyboard input support (English, Arabic)?
-7. Which shortcuts do you want first (apps, settings, sleep, input source)?
-8. Which status info matters most (current app, Wi-Fi signal, storage, memory, temperature, logs)?
-9. Preferred language and stack for the build? Otherwise we pick for speed.
-10. Should the GitHub repo be public or private, and under which account or org?
+- First client: laptop. Web app. Prototype first.
+- Control path: network ADB (covers keys, text, app launch, settings, status). The Android TV Remote protocol stays an option later.
+- Stack: Node + TypeScript server with no runtime dependencies; React + Vite + Mantine UI.
+- Shortcuts wanted first: apps the owner selects, and settings screens.
+- Status wanted first: network and RAM.
+- Keyboard languages: English and Arabic. English works now; Arabic is a known gap.
+- Willing to enable developer options and network debugging on the stick.
+
+## Still open
+
+1. Stick generation and Android version (run `npm run doctor`).
+2. Arabic input: which approach? A helper keyboard app on the stick, or switch to the Android TV Remote protocol.
+3. Phone access: needed later? It affects binding, auth and HTTPS.
+4. Which apps and settings screens should be built-in shortcuts?
+5. Extra status wanted (temperature, storage, logs)?
