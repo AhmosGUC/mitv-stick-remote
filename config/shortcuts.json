@@ -1,0 +1,16 @@
+[
+  { "id": "youtube", "label": "YouTube", "group": "Apps", "action": { "type": "app", "package": "com.google.android.youtube.tv" } },
+  { "id": "netflix", "label": "Netflix", "group": "Apps", "action": { "type": "app", "package": "com.netflix.ninja" } },
+  { "id": "prime", "label": "Prime Video", "group": "Apps", "action": { "type": "app", "package": "com.amazon.amazonvideo.livingroom" } },
+  { "id": "play-store", "label": "Play Store", "group": "Apps", "action": { "type": "app", "package": "com.android.vending" } },
+
+  { "id": "settings", "label": "Settings", "group": "Settings", "action": { "type": "intent", "action": "android.settings.SETTINGS" } },
+  { "id": "wifi", "label": "Wi-Fi", "group": "Settings", "action": { "type": "intent", "action": "android.settings.WIFI_SETTINGS" } },
+  { "id": "display", "label": "Display", "group": "Settings", "action": { "type": "intent", "action": "android.settings.DISPLAY_SETTINGS" } },
+  { "id": "manage-apps", "label": "Manage apps", "group": "Settings", "action": { "type": "intent", "action": "android.settings.APPLICATION_SETTINGS" } },
+  { "id": "developer", "label": "Developer options", "group": "Settings", "action": { "type": "intent", "action": "android.settings.APPLICATION_DEVELOPMENT_SETTINGS" } },
+
+  { "id": "search", "label": "Search", "group": "Keys", "action": { "type": "keys", "keys": ["SEARCH"] } },
+  { "id": "sleep", "label": "Sleep", "group": "Keys", "action": { "type": "keys", "keys": ["SLEEP"] } },
+  { "id": "wake", "label": "Wake", "group": "Keys", "action": { "type": "keys", "keys": ["WAKEUP"] } }
+]
