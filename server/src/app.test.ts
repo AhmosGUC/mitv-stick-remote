@@ -122,6 +122,17 @@ test('apps list and action log', async () => {
   assert.ok(log.json.some((e: any) => e.kind === 'text' && e.ok === false), 'failed Arabic attempt is logged');
 });
 
+test('killing an app removes its processes; bad names are rejected', async () => {
+  const before = (await call('GET', '/api/processes')).json;
+  assert.ok(before.some((p: any) => p.name === 'com.google.android.katniss:search'));
+  assert.equal((await call('POST', '/api/processes/kill', { package: 'com.google.android.katniss' })).status, 200);
+  assert.deepEqual(device.killed, ['com.google.android.katniss']);
+  const after = (await call('GET', '/api/processes')).json;
+  assert.ok(!after.some((p: any) => p.name.startsWith('com.google.android.katniss')));
+  assert.equal((await call('POST', '/api/processes/kill', { package: 'x; reboot' })).status, 400);
+  assert.equal((await call('POST', '/api/processes/kill', {})).status, 400);
+});
+
 test('processes are listed biggest first', async () => {
   const r = await call('GET', '/api/processes');
   assert.equal(r.status, 200);

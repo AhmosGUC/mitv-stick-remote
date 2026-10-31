@@ -13,7 +13,7 @@ const MOCK_APPS = [
   'com.android.vending',
 ];
 
-const MOCK_PROCESSES: ProcessMemory[] = [
+const MOCK_PROCESSES = (): ProcessMemory[] => [
   { name: 'org.xbmc.kodi', pid: 6404, memoryMb: 229.3, state: 'activities' },
   { name: 'com.google.android.gms', pid: 3142, memoryMb: 51 },
   { name: 'com.google.android.katniss:search', pid: 7918, memoryMb: 48.9 },
@@ -30,6 +30,8 @@ export class MockDevice implements Device {
   typed = '';
   foreground = 'com.mock.launcher';
   keys: KeyName[] = [];
+  killed: string[] = [];
+  private processes = MOCK_PROCESSES();
   private delayMs: number;
 
   constructor(delayMs = 25) {
@@ -79,6 +81,12 @@ export class MockDevice implements Device {
 
   async listProcesses(): Promise<ProcessMemory[]> {
     await sleep(this.delayMs);
-    return MOCK_PROCESSES.map((p) => ({ ...p }));
+    return this.processes.map((p) => ({ ...p }));
+  }
+
+  async killApp(packageName: string): Promise<void> {
+    await sleep(this.delayMs);
+    this.processes = this.processes.filter((p) => p.name.split(':')[0] !== packageName);
+    this.killed.push(packageName);
   }
 }

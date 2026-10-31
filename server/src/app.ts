@@ -4,7 +4,7 @@ import { UserError } from './device.ts';
 import type { Device } from './device.ts';
 import { Router, createHttpServer } from './http.ts';
 import { isKeyName } from './keys.ts';
-import { normalizeTypedText } from './parse.ts';
+import { PACKAGE_RE, normalizeTypedText } from './parse.ts';
 import { addCustomShortcut, loadShortcuts, removeCustomShortcut } from './shortcuts.ts';
 import type { ShortcutAction } from './shortcuts.ts';
 
@@ -109,6 +109,12 @@ export function createApp(opts: AppOptions): http.Server {
   router.get('/api/apps', () => act('apps', 'list installed apps', () => device.listApps()));
 
   router.get('/api/processes', () => act('processes', 'list RAM use by process', () => device.listProcesses()));
+
+  router.post('/api/processes/kill', async ({ body }) => {
+    const { package: pkg } = asObject(body);
+    if (typeof pkg !== 'string' || !PACKAGE_RE.test(pkg)) throw new UserError('Expected an app package name.');
+    await act('kill', pkg, () => device.killApp(pkg));
+  });
 
   router.get('/api/log', () => log.list());
 

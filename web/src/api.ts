@@ -27,5 +27,6 @@ export const api = {
   unpinShortcut: (id: string) => request<void>('DELETE', `/shortcuts/${encodeURIComponent(id)}`),
   apps: () => request<InstalledApp[]>('GET', '/apps'),
   processes: () => request<ProcessMemory[]>('GET', '/processes'),
+  killApp: (pkg: string) => request<void>('POST', '/processes/kill', { package: pkg }),
   log: () => request<LogEntry[]>('GET', '/log'),
 };

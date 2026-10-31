@@ -68,4 +68,6 @@ export interface Device {
   listApps(): Promise<InstalledApp[]>;
   /** Running processes, biggest RAM user first. */
   listProcesses(): Promise<ProcessMemory[]>;
+  /** Force-stop an app (all of its processes) to free its RAM. */
+  killApp(packageName: string): Promise<void>;
 }

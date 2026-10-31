@@ -125,6 +125,11 @@ export class AdbDevice implements Device {
     return parsePackages(out).map((p) => ({ package: p }));
   }
 
+  async killApp(packageName: string): Promise<void> {
+    if (!PACKAGE_RE.test(packageName)) throw new UserError(`Invalid package name: ${packageName}`);
+    await this.shell(`am force-stop ${packageName}`);
+  }
+
   async listProcesses(): Promise<ProcessMemory[]> {
     const out = await this.shell("dumpsys meminfo | sed -n '/^Total PSS by process:/,/^$/p'", 20_000);
     return parseProcessMemory(out);
